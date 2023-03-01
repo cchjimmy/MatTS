@@ -4,7 +4,7 @@
     "noImplicitAny": true,
     "removeComments": true,
     "preserveConstEnums": true,
-    "outFile": "built/local/bundle.js",
+    "outFile": "out/bundle.js",
     "sourceMap": true
   },
   "include": ["src/**/*"],

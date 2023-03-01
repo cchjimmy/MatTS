@@ -1,10 +1,10 @@
 {
   "name": "matts",
   "version": "1.0.0",
-  "main": "built/local/bundle.js",
+  "main": "out/bundle.js",
   "scripts": {
     "build": "tsc",
-    "run": "reset; node ./built/local/bundle.js"
+    "run": "reset; node out/bundle.js"
   },
   "author": "cchjimmy",
   "license": "MIT",

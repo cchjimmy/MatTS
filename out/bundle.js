@@ -1,18 +1,4 @@
 var Mat = {
-    matrix: function () {
-        var values = [];
-        for (var _i = 0; _i < arguments.length; _i++) {
-            values[_i] = arguments[_i];
-        }
-        var shape = Mat.shape(values);
-        var matrix = Mat.empty(shape[0], shape[1]);
-        for (var i = 0; i < shape[0]; i++) {
-            for (var j = 0; j < shape[1]; j++) {
-                matrix[i][j] = values[i][j] || 0;
-            }
-        }
-        return matrix;
-    },
     shape: function (m) {
         var rows = m.length;
         var columns = 0;
@@ -21,11 +7,11 @@ var Mat = {
         }
         return [rows, columns];
     },
-    zeroes: function (r, c) {
+    fill: function (r, c, value) {
         var matrix = new Array(r);
         var row = new Array(c);
         for (var i = 0; i < c; i++) {
-            row[i] = 0;
+            row[i] = value;
         }
         for (var i = 0; i < r; i++) {
             matrix[i] = row.slice(0);
@@ -33,7 +19,7 @@ var Mat = {
         return matrix;
     },
     identity: function (order) {
-        var matrix = Mat.zeroes(order, order);
+        var matrix = Mat.fill(order, order, 0);
         for (var i = 0; i < order; i++) {
             matrix[i][i] = 1;
         }
@@ -47,28 +33,33 @@ var Mat = {
         }
         return matrix;
     },
-    add: function (m1, m2) {
-        var shape1 = Mat.shape(m1);
-        for (var i = 0; i < shape1[0]; i++) {
-            for (var j = 0; j < shape1[1]; j++) {
+    addM: function (m1, m2) {
+        for (var i = 0; i < m1.length; i++) {
+            for (var j = 0; j < m1[0].length; j++) {
                 m1[i][j] += m2[i][j];
             }
         }
         return m1;
     },
+    addS: function (m, s) {
+        for (var i = 0; i < m.length; i++) {
+            for (var j = 0; j < m[0].length; j++) {
+                m[i][j] += s;
+            }
+        }
+        return m;
+    },
     subM: function (m1, m2) {
-        var shape1 = Mat.shape(m1);
-        for (var i = 0; i < shape1[0]; i++) {
-            for (var j = 0; j < shape1[1]; j++) {
+        for (var i = 0; i < m1.length; i++) {
+            for (var j = 0; j < m1[0].length; j++) {
                 m1[i][j] -= m2[i][j];
             }
         }
         return m1;
     },
     subS: function (m, s) {
-        var shape = Mat.shape(m);
-        for (var i = 0; i < shape[0]; i++) {
-            for (var j = 0; j < shape[1]; j++) {
+        for (var i = 0; i < m.length; i++) {
+            for (var j = 0; j < m[0].length; j++) {
                 m[i][j] -= s;
             }
         }
@@ -78,18 +69,15 @@ var Mat = {
         if (rI === void 0) { rI = 0; }
         if (cI === void 0) { cI = 0; }
         var result = 0;
-        var shape1 = Mat.shape(m1);
-        for (var i = 0; i < shape1[1]; i++) {
+        for (var i = 0; i < m1[rI].length; i++) {
             result += m1[rI][i] * m2[i][cI];
         }
         return result;
     },
     multM: function (m1, m2) {
-        var shape1 = Mat.shape(m1);
-        var shape2 = Mat.shape(m2);
-        var result = Mat.empty(shape1[0], shape2[1]);
-        for (var i = 0; i < shape1[0]; i++) {
-            for (var j = 0; j < shape2[1]; j++) {
+        var result = Mat.empty(m1.length, m2[0].length);
+        for (var i = 0; i < m1.length; i++) {
+            for (var j = 0; j < m2[0].length; j++) {
                 result[i][j] = Mat.dot(m1, m2, i, j);
             }
         }
@@ -136,27 +124,31 @@ var Mat = {
     var resolution = [400, 400];
     var canvas = document.querySelector("canvas");
     var ctx = canvas.getContext("2d");
-    var pos = Mat.multM(Mat.random(numberOfObjects, 2), Mat.matrix([resolution[0], 0], [0, resolution[1]]));
+    var pos = Mat.multM(Mat.random(numberOfObjects, 2), [[resolution[0], 0], [0, resolution[1]]]);
     var ang = new Array(numberOfObjects);
     var scale = Mat.random(numberOfObjects, 2);
     var maxSize = 50;
-    var vel = Mat.empty(numberOfObjects, 2);
-    var shape = Mat.matrix([-0.5, -0.5], [0.5, -0.5], [0.5, 0.5], [-0.5, 0.5]);
+    var vel = Mat.random(numberOfObjects, 2);
+    var shape = [
+        [-0.5, -0.5],
+        [0.5, -0.5],
+        [0.5, 0.5],
+        [-0.5, 0.5]
+    ];
     main();
     function main() {
         canvas.width = resolution[0];
         canvas.height = resolution[1];
         Mat.multS(scale, maxSize);
+        Mat.subS(vel, 0.5);
         for (var i = 0; i < numberOfObjects; i++) {
-            vel[i][0] = Math.random() - 0.5;
-            vel[i][1] = Math.random() - 0.5;
             ang[i] = Math.random();
         }
         loop();
     }
     function loop() {
         ctx.clearRect(0, 0, resolution[0], resolution[1]);
-        Mat.add(pos, vel);
+        Mat.addM(pos, vel);
         for (var i = 0; i < pos.length; i++) {
             if (pos[i][0] < 0 || pos[i][0] > resolution[0])
                 vel[i][0] *= -1;
@@ -175,8 +167,11 @@ var Mat = {
         for (var i = 0; i < numberOfObjects; i++) {
             var c = Math.cos(ang[i]);
             var s = Math.sin(ang[i]);
-            var rot = Mat.matrix([c, -s], [s, c]);
-            var transform = Mat.multM(rot, Mat.matrix([scale[i][0], 0], [0, scale[i][1]]));
+            var rot = [
+                [c, -s],
+                [s, c]
+            ];
+            var transform = Mat.multM(rot, [[scale[i][0], 0], [0, scale[i][1]]]);
             var transformed = Mat.multM(shape, Mat.transpose(transform));
             for (var j = 0; j < transformed.length; j++) {
                 transformed[j][0] += pos[i][0];
