@@ -178,11 +178,15 @@ var Mat = {
             var rot = Mat.matrix([c, -s], [s, c]);
             var transform = Mat.multM(rot, Mat.matrix([scale[i][0], 0], [0, scale[i][1]]));
             var transformed = Mat.multM(shape, Mat.transpose(transform));
-            ctx.moveTo(pos[i][0] + transformed[0][0], pos[i][1] + transformed[0][1]);
-            for (var j = 1; j < transformed.length; j++) {
-                ctx.lineTo(pos[i][0] + transformed[j][0], pos[i][1] + transformed[j][1]);
+            for (var j = 0; j < transformed.length; j++) {
+                transformed[j][0] += pos[i][0];
+                transformed[j][1] += pos[i][1];
             }
-            ctx.lineTo(pos[i][0] + transformed[0][0], pos[i][1] + transformed[0][1]);
+            ctx.moveTo(transformed[0][0], transformed[0][1]);
+            for (var j = 1; j < transformed.length; j++) {
+                ctx.lineTo(transformed[j][0], transformed[j][1]);
+            }
+            ctx.lineTo(transformed[0][0], transformed[0][1]);
         }
         fill ? ctx.fill() : ctx.stroke();
         ctx.restore();
