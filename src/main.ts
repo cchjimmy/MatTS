@@ -1,19 +1,14 @@
 (function () {
-  const numberOfObjects = 1000;
-  const resolution = [400, 400];
   const canvas = document.querySelector("canvas");
   const ctx = canvas.getContext("2d");
+  const numberOfObjects = 500;
+  const resolution = [400, 400];
+  const maxSize = 50;
+  const shape = generateStar();
   const pos = Mat.multM(Mat.random(numberOfObjects, 2), [[resolution[0], 0], [0, resolution[1]]]);
   const ang = new Array(numberOfObjects);
   const scale = Mat.random(numberOfObjects, 2);
-  const maxSize = 50;
   const vel = Mat.random(numberOfObjects, 2);
-  const shape = [
-    [-0.5, -0.5],
-    [0.5, -0.5],
-    [0.5, 0.5],
-    [-0.5, 0.5]
-  ];
 
   main();
 
@@ -24,7 +19,7 @@
     Mat.subS(vel, 0.5);
 
     for (let i = 0; i < numberOfObjects; i++) {
-      ang[i] = Math.random();
+      ang[i] = Math.random() * Math.PI * 2;
     }
 
     loop();
@@ -70,5 +65,28 @@
     }
     fill ? ctx.fill() : ctx.stroke();
     ctx.restore();
+  }
+
+  function generateStar(numberOfSpikes: number = 5, R_out: number = 1, R_in: number = 0.5): number[][] {
+    let dR = Math.PI * 2 / (numberOfSpikes * 2);
+    let vertices: number[][] = new Array(numberOfSpikes * 2);
+    let I = [
+      [0, R_in]
+    ];
+    let O = [
+      [0, R_out]
+    ];
+    for (let i = 0; i < vertices.length; i++) {
+      let c = Math.cos(dR * i);
+      let s = Math.sin(dR * i);
+      let rot = [
+        [c, -s],
+        [s, c]
+      ];
+      let input: number[][] = i % 2 ? O : I;
+      let transformed = Mat.multM(input, Mat.transpose(rot));
+      vertices[i] = [transformed[0][0], transformed[0][1]];
+    }
+    return vertices;
   }
 }());

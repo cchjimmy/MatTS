@@ -120,21 +120,16 @@ var Mat = {
     }
 };
 (function () {
-    var numberOfObjects = 1000;
-    var resolution = [400, 400];
     var canvas = document.querySelector("canvas");
     var ctx = canvas.getContext("2d");
+    var numberOfObjects = 500;
+    var resolution = [400, 400];
+    var maxSize = 50;
+    var shape = generateStar();
     var pos = Mat.multM(Mat.random(numberOfObjects, 2), [[resolution[0], 0], [0, resolution[1]]]);
     var ang = new Array(numberOfObjects);
     var scale = Mat.random(numberOfObjects, 2);
-    var maxSize = 50;
     var vel = Mat.random(numberOfObjects, 2);
-    var shape = [
-        [-0.5, -0.5],
-        [0.5, -0.5],
-        [0.5, 0.5],
-        [-0.5, 0.5]
-    ];
     main();
     function main() {
         canvas.width = resolution[0];
@@ -142,7 +137,7 @@ var Mat = {
         Mat.multS(scale, maxSize);
         Mat.subS(vel, 0.5);
         for (var i = 0; i < numberOfObjects; i++) {
-            ang[i] = Math.random();
+            ang[i] = Math.random() * Math.PI * 2;
         }
         loop();
     }
@@ -185,6 +180,31 @@ var Mat = {
         }
         fill ? ctx.fill() : ctx.stroke();
         ctx.restore();
+    }
+    function generateStar(numberOfSpikes, R_out, R_in) {
+        if (numberOfSpikes === void 0) { numberOfSpikes = 5; }
+        if (R_out === void 0) { R_out = 1; }
+        if (R_in === void 0) { R_in = 0.5; }
+        var dR = Math.PI * 2 / (numberOfSpikes * 2);
+        var vertices = new Array(numberOfSpikes * 2);
+        var I = [
+            [0, R_in]
+        ];
+        var O = [
+            [0, R_out]
+        ];
+        for (var i = 0; i < vertices.length; i++) {
+            var c = Math.cos(dR * i);
+            var s = Math.sin(dR * i);
+            var rot = [
+                [c, -s],
+                [s, c]
+            ];
+            var input = i % 2 ? O : I;
+            var transformed = Mat.multM(input, Mat.transpose(rot));
+            vertices[i] = [transformed[0][0], transformed[0][1]];
+        }
+        return vertices;
     }
 }());
 //# sourceMappingURL=bundle.js.map
