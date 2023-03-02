@@ -139,10 +139,11 @@ var Mat = {
         for (var i = 0; i < numberOfObjects; i++) {
             ang[i] = Math.random() * Math.PI * 2;
         }
+        ctx.fillStyle = "rgba(0, 0, 0, 0.1)";
         loop();
     }
     function loop() {
-        ctx.clearRect(0, 0, resolution[0], resolution[1]);
+        ctx.fillRect(0, 0, resolution[0], resolution[1]);
         Mat.addM(pos, vel);
         for (var i = 0; i < pos.length; i++) {
             if (pos[i][0] < 0 || pos[i][0] > resolution[0])
@@ -150,7 +151,7 @@ var Mat = {
             if (pos[i][1] < 0 || pos[i][1] > resolution[1])
                 vel[i][1] *= -1;
         }
-        batchShapeDraw(numberOfObjects, shape, pos, ang, scale);
+        batchShapeDraw(numberOfObjects, shape, pos, ang, scale, "white");
         requestAnimationFrame(loop);
     }
     function batchShapeDraw(numberOfObjects, shape, pos, ang, scale, color, fill) {
@@ -183,8 +184,8 @@ var Mat = {
     }
     function generateStar(numberOfSpikes, R_out, R_in) {
         if (numberOfSpikes === void 0) { numberOfSpikes = 5; }
-        if (R_out === void 0) { R_out = 1; }
-        if (R_in === void 0) { R_in = 0.5; }
+        if (R_out === void 0) { R_out = 0.5; }
+        if (R_in === void 0) { R_in = 0.25; }
         var dR = Math.PI * 2 / (numberOfSpikes * 2);
         var vertices = new Array(numberOfSpikes * 2);
         var I = [

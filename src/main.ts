@@ -22,11 +22,13 @@
       ang[i] = Math.random() * Math.PI * 2;
     }
 
+    ctx.fillStyle = "rgba(0, 0, 0, 0.1)";
+
     loop();
   }
 
   function loop() {
-    ctx.clearRect(0, 0, resolution[0], resolution[1]);
+    ctx.fillRect(0, 0, resolution[0], resolution[1]);
     Mat.addM(pos, vel);
     for (let i = 0; i < pos.length; i++) {
       if (pos[i][0] < 0 || pos[i][0] > resolution[0])
@@ -36,7 +38,7 @@
         vel[i][1] *= -1;
 
     }
-    batchShapeDraw(numberOfObjects, shape, pos, ang, scale);
+    batchShapeDraw(numberOfObjects, shape, pos, ang, scale, "white");
     requestAnimationFrame(loop);
   }
 
@@ -67,7 +69,7 @@
     ctx.restore();
   }
 
-  function generateStar(numberOfSpikes: number = 5, R_out: number = 1, R_in: number = 0.5): number[][] {
+  function generateStar(numberOfSpikes: number = 5, R_out: number = 0.5, R_in: number = 0.25): number[][] {
     let dR = Math.PI * 2 / (numberOfSpikes * 2);
     let vertices: number[][] = new Array(numberOfSpikes * 2);
     let I = [
